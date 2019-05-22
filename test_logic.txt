@@ -1,0 +1,49 @@
+import csv
+import numpy as np
+import pandas as pd
+import scipy.stats as sp
+from sklearn.linear_model import LogisticRegression
+import xgboost as xgb
+# params = {'n_estimators': 500, 'max_depth': 4, 'min_samples_split': 2,
+#           'learning_rate': 0.01, 'loss': 'ls'}
+train_data = pd.read_csv(r'train_data_new.csv')
+test_data = pd.read_csv(r'test_data_new.csv')
+
+
+feature_train_data = [x for x in train_data.columns if x not in []]
+feature_test_data = [x for x in test_data.columns if x not in []]
+feature_train_lab = [x for x in train_lab.columns if x not in []]
+#print(feature)
+#a_train = xgb.DMatrix(a[feature].values)
+#print(a_train)
+# print(train_data[feature_train_data].values)
+# print(test_data[feature_test_data].values)
+# print(train_lab[feature_train_lab].values)
+
+#train_data.age = list(map(lambda x:int(x),train_data.age))
+#print(a['id','gender'])
+#print(list(a['id','gender']))
+#print(list(a).values.tolist())
+#a = list(a[list(a)])
+#print(list(a[list(a)]))
+#print(c.values.tolist())
+#print(c.values.tolist().size)
+#print(list(c['click_w228']))
+# x_train = np.array([[1,2,3],[1,3,4],[2,1,2],[4,5,6],[3,5,3],[1,7,2]])
+# y_train = np.array([0,0,0,1,1,1])
+# x_test = np.array([[2,2,2],[3,2,6],[1,7,4]])
+#print(test_data[feature_test_data].values)
+#print(pred_users['id'])
+
+clf = LogisticRegression()
+clf.fit(train_data[feature_train_data].values,train_lab[feature_train_lab].values)
+yuce = clf.predict_proba(test_data[feature_test_data].values)
+#print(test_data[feature_test_data].values.shape)
+#print(yuce.shape)
+#print(yuce)
+header = ['id','score']
+#print(pred_users['id'])
+k=pd.DataFrame(list(zip(pred_users['id'],[x[1] for x in yuce])),columns=header)
+k.to_csv('pred.csv',encoding='utf-8',index=False)
+#print(k)
+#print(clf.predict(test_data[feature_test_data].values))

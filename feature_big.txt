@@ -1,0 +1,351 @@
+# -*- coding: utf-8 -*-
+# 用来划分训练集和验证集
+import csv
+import numpy as np
+import pandas as pd
+import scipy.stats as sp
+import string
+
+date_train = ['2019-01-01','2019-01-02','2019-01-03','2019-01-04','2019-01-05','2019-01-06','2019-01-07','2019-01-08','2019-01-09','2019-01-10','2019-01-11','2019-01-12','2019-01-13','2019-01-14','2019-01-15','2019-01-16','2019-01-17','2019-01-18','2019-01-19','2019-01-20','2019-01-21','2019-01-22','2019-01-23','2019-01-24','2019-01-25','2019-01-26','2019-01-27','2019-01-28','2019-01-29','2019-01-30','2019-01-31','2019-02-01','2019-02-02','2019-02-03','2019-02-04','2019-02-05','2019-02-06','2019-02-07','2019-02-08','2019-02-09','2019-02-10','2019-02-11','2019-02-12','2019-02-13','2019-02-14','2019-02-15','2019-02-16','2019-02-17','2019-02-18','2019-02-19','2019-02-20','2019-02-21','2019-02-22','2019-02-23','2019-02-24','2019-02-25','2019-02-26','2019-02-27']
+date_train_1 = ['2019-01-01','2019-01-02','2019-01-03','2019-01-04','2019-01-05','2019-01-06','2019-01-07','2019-01-08','2019-01-09','2019-01-10','2019-01-11','2019-01-12','2019-01-13','2019-01-14','2019-01-15','2019-01-16','2019-01-17','2019-01-18','2019-01-19']
+date_train_2 = ['2019-01-20','2019-01-21','2019-01-22','2019-01-23','2019-01-24','2019-01-25','2019-01-26','2019-01-27','2019-01-28','2019-01-29','2019-01-30','2019-01-31','2019-02-01','2019-02-02','2019-02-03','2019-02-04','2019-02-05','2019-02-06','2019-02-07']
+data_train_3 = ['2019-02-08','2019-02-09','2019-02-10','2019-02-11','2019-02-12','2019-02-13','2019-02-14','2019-02-15','2019-02-16','2019-02-17','2019-02-18','2019-02-19','2019-02-20','2019-02-21','2019-02-22','2019-02-23','2019-02-24','2019-02-25','2019-02-26','2019-02-27']
+data_train_lastweek = ['2019-02-21','2019-02-22','2019-02-23','2019-02-24','2019-02-25','2019-02-26','2019-02-27']
+
+date_test = ['2019-01-08','2019-01-09','2019-01-10','2019-01-11','2019-01-12','2019-01-13','2019-01-14','2019-01-15','2019-01-16','2019-01-17','2019-01-18','2019-01-19','2019-01-20','2019-01-21','2019-01-22','2019-01-23','2019-01-24','2019-01-25','2019-01-26','2019-01-27','2019-01-28','2019-01-29','2019-01-30','2019-01-31','2019-02-01','2019-02-02','2019-02-03','2019-02-04','2019-02-05','2019-02-06','2019-02-07','2019-02-08','2019-02-09','2019-02-10','2019-02-11','2019-02-12','2019-02-13','2019-02-14','2019-02-15','2019-02-16','2019-02-17','2019-02-18','2019-02-19','2019-02-20','2019-02-21','2019-02-22','2019-02-23','2019-02-24','2019-02-25','2019-02-26','2019-02-27','2019-02-28','2019-03-01','2019-03-02','2019-03-03','2019-03-04','2019-03-05','2019-03-06']
+date_test_1 = ['2019-01-08','2019-01-09','2019-01-10','2019-01-11','2019-01-12','2019-01-13','2019-01-14','2019-01-15','2019-01-16','2019-01-17','2019-01-18','2019-01-19','2019-01-20','2019-01-21','2019-01-22','2019-01-23','2019-01-24','2019-01-25','2019-01-26']
+date_test_2 = ['2019-01-27','2019-01-28','2019-01-29','2019-01-30','2019-01-31','2019-02-01','2019-02-02','2019-02-03','2019-02-04','2019-02-05','2019-02-06','2019-02-07','2019-02-08','2019-02-09','2019-02-10','2019-02-11','2019-02-12','2019-02-13','2019-02-14']
+date_test_3 = ['2019-02-15','2019-02-16','2019-02-17','2019-02-18','2019-02-19','2019-02-20','2019-02-21','2019-02-22','2019-02-23','2019-02-24','2019-02-25','2019-02-26','2019-02-27','2019-02-28','2019-03-01','2019-03-02','2019-03-03','2019-03-04','2019-03-05','2019-03-06']
+date_test_lastweek = ['2019-02-28','2019-03-01','2019-03-02','2019-03-03','2019-03-04','2019-03-05','2019-03-06']
+
+# list_z = [0101,0102,0103,0104,0105,0106,0107,0108,0109,0110,0111,0112,0113,0114,0115,0116,0117,0118,0119,0120,0121,0122,0123,0124,0125,0126,0127,0128,0129,0130,0131,0132,0133,0134,0135,0136]
+# list_s = [0201,0202,0203,0204,0205,0206,0207,0208,0209,0210,0211,0212,0213]
+# list_l = [0301,0302,0303,0304,0305,0306,0307,0308,0309,0310,0311]
+
+list_z_s = [101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,201,202,203,204,205,206,207,208,209,210,211,212,213]
+list_l = [301,302,303,304,305,306,307,308,309,310,311]
+
+#加载数据表
+#添加week
+print('begin')
+#加载收支数据并加入星期和加入可处理的时间
+sz_detail = pd.read_csv(r'sz_detail.csv')
+# sz_detail['week'] =pd.to_datetime(sz_detail.prt_dt)
+# sz_detail.week = list(map(lambda x:x.weekday(),sz_detail.week))
+# temp=sz_detail['prt_dt'].str.split('-')
+# temp1 = list(map(lambda line: line[0],temp))
+# temp2 = list(map(lambda line: line[1],temp))
+# temp3 = list(map(lambda line: line[2],temp))
+# sz_detail['year'] = temp1
+# sz_detail['month'] = temp2
+# sz_detail['day'] = temp3
+# sz_detail['year'] = sz_detail['year'].astype(int)
+# sz_detail['month'] = sz_detail['month'].astype(int)
+# sz_detail['day'] = sz_detail['day'].astype(int)
+# print('a')
+# sz_detail['d'] = sz_detail['year']*10000+sz_detail['month']*100+sz_detail['day']
+# print('b')
+
+
+#print(sz_detail.info())
+trx_cod = pd.read_csv(r'trx_cod.csv')
+#print(trx_cod.info())
+g2 = pd.read_csv(r'g2.csv')
+cust_bas_inf = pd.read_csv(r'cust_bas_inf.csv')
+train_lab = pd.read_csv(r'train.csv')
+test_lab = pd.read_csv(r'pred_users.csv')
+
+#处理cust_bas_inf表中的非数字
+cust_bas_inf['gender'] = pd.DataFrame([1 if item=='M' else -1 for item in list(cust_bas_inf['gender'].str.strip())])#去掉多余字符和不符合的字符
+cust_bas_inf['gender'] = cust_bas_inf['gender'].astype(int)
+cust_bas_inf['age'] = pd.DataFrame([0 if item=='\\N' else item for item in list(cust_bas_inf['age'].str.strip())])
+cust_bas_inf['age'] = cust_bas_inf['age'].astype(int)
+cust_bas_inf['aum227'] = pd.DataFrame([0.0 if item=='\\N' else item for item in list(cust_bas_inf['aum227'].str.strip())])
+cust_bas_inf['aum227'] = cust_bas_inf['aum227'].astype(np.float64)
+cust_bas_inf['aum306'] = pd.DataFrame([0.0 if item=='\\N' else item for item in list(cust_bas_inf['aum306'].str.strip())])
+cust_bas_inf['aum306'] = cust_bas_inf['aum306'].astype(np.float64)
+#print(cust_bas_inf.info())
+print('qqq')
+
+def get_av_time_dis(x):#apply
+
+    x=x.str_day
+    if x!=x:
+        x='-1'
+    # print(x)
+    day = x.split(':')
+    day = list(set(day))
+    day = list(map(lambda x:float(x),day))
+    day.sort()
+    if day is None or len(day) == 0:
+        return 0
+    m={}
+    res = 0
+    for i in day:
+        if i not in m:
+            l=0
+            r=0
+            if i-1 in m:
+                l = m[i-1]
+            if i+1 in m:
+                r = m[i+1]
+            m[i] = 1+r+l
+            m[i+r] = 1+r+l
+            m[i-l] = 1+r+l
+            res = max(res,m[i])
+    return res
+
+
+def getF(data_id,data_aum,data_sz):
+    #补全全体
+    data_sz = pd.merge(cust_bas_inf['id'], data_sz, on=['id'], how='left')  #
+    data_sz = data_sz.fillna(0)
+    data_gb = data_sz.groupby(['id'])
+    
+    # 1、训练期间交易总额
+    temp = data_gb['rmb_amt'].agg({'sum': np.sum})  #
+    result = pd.merge(data_id, temp, on=['id'], how='left')  #
+    #print(result)
+    
+#     # 2、训练期间初始总额
+#     result['first'] = data_aum['aum']-result['sum']
+    
+#     # 3、训练期间交易平均额
+#     temp = data_gb['rmb_amt'].agg({'mean': np.mean})  #
+#     result = pd.merge(result, temp, on=['id'], how='left')  #
+    
+#     # 4、训练期间交易median
+#     temp = data_gb['rmb_amt'].agg({'median': np.median})  #
+#     result = pd.merge(result, temp, on=['id'], how='left')  #
+
+#     # 5、训练期间交易max
+#     temp = data_gb['rmb_amt'].agg({'max': np.max})  #
+#     result = pd.merge(result, temp, on=['id'], how='left')  #
+
+#     # 6、训练期间交易min
+#     temp = data_gb['rmb_amt'].agg({'min': np.min})  #
+#     result = pd.merge(result, temp, on=['id'], how='left')  #
+
+#     # 7、训练期间交易偏度
+#     temp = data_gb['rmb_amt'].agg({'skew': sp.stats.skew})  #
+#     result = pd.merge(result, temp, on=['id'], how='left')  #
+
+#     # 8、训练期间交易峰度
+#     temp = data_gb['rmb_amt'].agg({'kurt': sp.stats.kurtosis})  #
+#     result = pd.merge(result, temp, on=['id'], how='left')  #
+
+#     # 9、训练期间交易次数
+#     temp = data_gb['rmb_amt'].agg({'count': np.size})  #
+#     result = pd.merge(result, temp, on=['id'], how='left')  #
+    
+#     # 10、训练期间交易天数
+#     print(data_sz.info())
+#     data_sz_drop = data_sz.drop_duplicates(['id','d'])
+#     data_gb_day = data_sz_drop.groupby(['id'])
+#     temp = data_gb_day['rmb_amt'].agg({'count_day': np.size})  #
+#     result = pd.merge(result, temp, on=['id'], how='left')  #
+    
+#     # 11、训练期间平均每天交易总额
+#     result['sum_everyday'] = result['sum']/result['count_day']
+    
+    # 12、平均每天操作数
+    temp = data_sz.groupby(['id','d'])['rmb_amt'].agg({'day_cz_count': np.size})
+    data = pd.merge(data_sz, temp, on=['id','d'], how='left')  #
+    temp = data.drop_duplicates(['id','d'])
+    temp = temp.groupby(['id'])['day_cz_count'].agg({'day_cz_mean': np.mean})
+    result = pd.merge(result, temp, on=['id'], how='left')  #
+    
+    
+    # 每天操作数方差
+    temp = data.drop_duplicates(['id','d'])
+    temp = temp = temp.groupby(['id'])['day_cz_count'].agg({'day_cz_mean': np.var})
+    result = pd.merge(result, temp, on=['id'], how='left')  #
+    
+    # 每天操作数标准差
+    temp = data.drop_duplicates(['id','d'])
+    temp = temp = temp.groupby(['id'])['day_cz_count'].agg({'day_cz_mean': np.std})
+    result = pd.merge(result, temp, on=['id'], how='left')  #
+    
+    # 每天操作数中位数
+    temp = data.drop_duplicates(['id','d'])
+    temp = temp = temp.groupby(['id'])['day_cz_count'].agg({'day_cz_mean': np.median})
+    result = pd.merge(result, temp, on=['id'], how='left')  #
+    
+    # 每天操作数max
+    temp = data.drop_duplicates(['id','d'])
+    temp = temp = temp.groupby(['id'])['day_cz_count'].agg({'day_cz_mean': np.max})
+    result = pd.merge(result, temp, on=['id'], how='left')  #
+    
+    # 每天操作数min
+    temp = data.drop_duplicates(['id','d'])
+    temp = temp = temp.groupby(['id'])['day_cz_count'].agg({'day_cz_mean': np.min})
+    result = pd.merge(result, temp, on=['id'], how='left')  #
+    
+    # 每天操作数偏度
+    temp = data.drop_duplicates(['id','d'])
+    temp = temp = temp.groupby(['id'])['day_cz_count'].agg({'day_cz_mean': sp.stats.skew})
+    result = pd.merge(result, temp, on=['id'], how='left')  #
+    
+    # 每天操作数峰度
+    temp = data.drop_duplicates(['id','d'])
+    temp = temp = temp.groupby(['id'])['day_cz_count'].agg({'day_cz_mean': sp.stats.kurtosis})
+    result = pd.merge(result, temp, on=['id'], how='left')  #
+    
+    # 最大连续操作天数
+    temp = data[['id', 'd']]
+    temp['d'] = temp['d'].astype('str')
+    temp = temp.groupby(['id'])['d'].agg(lambda x: ':'.join(x))
+    temp = temp.drop_duplicates(['id', 'd'])  # 去重
+    temp.rename(columns={'d': 'str_day'}, inplace=True)
+    temp['max_continue_day'] = temp.apply(get_av_time_dis, axis=1)#apply
+    temp = temp[['id','max_continue_day']]
+    result = pd.merge(result, temp, on=['id'], how='left')  #
+    
+
+    result = result.fillna(0)
+    print('aaa')
+    #result['gender'] = result['gender'].map(lambda x: 1 if x == 'M' else -1)
+    
+    return result
+    
+def z_s_z(data,sz):
+    temp1 = getF(data['id'],data,sz)
+    temp2 = getF(data['id'],data,sz[sz['rmb_amt']>=0])
+    temp3 = getF(data['id'],data,sz[sz['rmb_amt']<0])
+    sz['rmb_amt'] = np.abs(sz['rmb_amt'])#收支的绝对值
+    temp4 = getF(data['id'],data,sz)
+    data_z = pd.merge(temp1, temp2, on=['id'], how='left')  #
+    data_z = pd.merge(data_z, temp3, on=['id'], how='left')  #
+    data_z = pd.merge(data_z, temp4, on=['id'], how='left')  #
+    return data_z
+
+def sz_class_split(data,sz_detail_data):
+    sz_detail_data_1 = sz_detail_data[(sz_detail_data['sz_id'].isin(list_z_s))]
+    sz_detail_data_2 = sz_detail_data[(sz_detail_data['sz_id'].isin(list_l))]
+    temp1 = z_s_z(data,sz_detail_data)
+    temp2 = z_s_z(data,sz_detail_data_1)
+    temp3 = z_s_z(data,sz_detail_data_2)
+    data_z = pd.merge(temp1, temp2, on=['id'], how='left')  #
+    data_z = pd.merge(data_z, temp3, on=['id'], how='left')  #
+    return data_z
+    
+    
+#训练集按照时间分为三个阶段，并加入最后一星期    
+def time_split_train(data,sz_detail_data):
+    sz_detail_data = sz_detail_data[(sz_detail_data['prt_dt'].isin(date_train))]
+    sz_detail_data_1 = sz_detail_data[(sz_detail_data['prt_dt'].isin(date_train_1))]
+    sz_detail_data_2 = sz_detail_data[(sz_detail_data['prt_dt'].isin(date_train_2))]
+    sz_detail_data_3 = sz_detail_data[(sz_detail_data['prt_dt'].isin(data_train_3))]
+    sz_detail_data_lastweek = sz_detail[(sz_detail['prt_dt'].isin(data_train_lastweek))]
+    sz_detail_data_week0 = sz_detail_data[(sz_detail_data['week']==0)]
+    sz_detail_data_week1 = sz_detail_data[(sz_detail_data['week']==1)]
+    sz_detail_data_week2 = sz_detail_data[(sz_detail_data['week']==2)]
+    sz_detail_data_week3 = sz_detail_data[(sz_detail_data['week']==3)]
+    sz_detail_data_week4 = sz_detail_data[(sz_detail_data['week']==4)]
+    sz_detail_data_week5 = sz_detail_data[(sz_detail_data['week']==5)]
+    sz_detail_data_week6 = sz_detail_data[(sz_detail_data['week']==6)]
+    temp1 = sz_class_split(data,sz_detail_data)
+    temp2 = sz_class_split(data,sz_detail_data_1)
+    temp3 = sz_class_split(data,sz_detail_data_2)
+    temp4 = sz_class_split(data,sz_detail_data_3)
+    temp5 = sz_class_split(data,sz_detail_data_lastweek)
+    temp6 = sz_class_split(data,sz_detail_data_week0)
+    temp7 = sz_class_split(data,sz_detail_data_week1)
+    temp8 = sz_class_split(data,sz_detail_data_week2)
+    temp9 = sz_class_split(data,sz_detail_data_week3)
+    temp10= sz_class_split(data,sz_detail_data_week4)
+    temp11 = sz_class_split(data,sz_detail_data_week5)
+    temp12 = sz_class_split(data,sz_detail_data_week6)
+    data_z = pd.merge(temp1, temp2, on=['id'], how='left')  #
+    data_z = pd.merge(data_z, temp3, on=['id'], how='left')  #
+    data_z = pd.merge(data_z, temp4, on=['id'], how='left')  #
+    data_z = pd.merge(data_z, temp5, on=['id'], how='left')  #
+    data_z = pd.merge(data_z, temp6, on=['id'], how='left')  #
+    data_z = pd.merge(data_z, temp7, on=['id'], how='left')  #
+    data_z = pd.merge(data_z, temp8, on=['id'], how='left')  #
+    data_z = pd.merge(data_z, temp9, on=['id'], how='left')  #
+    data_z = pd.merge(data_z, temp10, on=['id'], how='left')  #
+    data_z = pd.merge(data_z, temp11, on=['id'], how='left')  #
+    data_z = pd.merge(data_z, temp12, on=['id'], how='left')  #
+    return data_z
+
+#测试集按照时间分为三个阶段，并加入最后一星期 
+def time_split_test(data,sz_detail_data):
+    sz_detail_data = sz_detail_data[(sz_detail_data['prt_dt'].isin(date_test))]
+    sz_detail_data_1 = sz_detail_data[(sz_detail_data['prt_dt'].isin(date_test_1))]
+    sz_detail_data_2 = sz_detail_data[(sz_detail_data['prt_dt'].isin(date_test_2))]
+    sz_detail_data_3 = sz_detail_data[(sz_detail_data['prt_dt'].isin(date_test_3))]
+    sz_detail_data_lastweek = sz_detail[(sz_detail['prt_dt'].isin(date_test_lastweek))]
+    sz_detail_data_week0 = sz_detail_data[(sz_detail_data['week']==0)]
+    sz_detail_data_week1 = sz_detail_data[(sz_detail_data['week']==1)]
+    sz_detail_data_week2 = sz_detail_data[(sz_detail_data['week']==2)]
+    sz_detail_data_week3 = sz_detail_data[(sz_detail_data['week']==3)]
+    sz_detail_data_week4 = sz_detail_data[(sz_detail_data['week']==4)]
+    sz_detail_data_week5 = sz_detail_data[(sz_detail_data['week']==5)]
+    sz_detail_data_week6 = sz_detail_data[(sz_detail_data['week']==6)]
+    temp1 = sz_class_split(data,sz_detail_data)
+    temp2 = sz_class_split(data,sz_detail_data_1)
+    temp3 = sz_class_split(data,sz_detail_data_2)
+    temp4 = sz_class_split(data,sz_detail_data_3)
+    temp5 = sz_class_split(data,sz_detail_data_lastweek)
+    temp6 = sz_class_split(data,sz_detail_data_week0)
+    temp7 = sz_class_split(data,sz_detail_data_week1)
+    temp8 = sz_class_split(data,sz_detail_data_week2)
+    temp9 = sz_class_split(data,sz_detail_data_week3)
+    temp10= sz_class_split(data,sz_detail_data_week4)
+    temp11 = sz_class_split(data,sz_detail_data_week5)
+    temp12 = sz_class_split(data,sz_detail_data_week6)
+    data_z = pd.merge(temp1, temp2, on=['id'], how='left')  #
+    data_z = pd.merge(data_z, temp3, on=['id'], how='left')  #
+    data_z = pd.merge(data_z, temp4, on=['id'], how='left')  #
+    data_z = pd.merge(data_z, temp5, on=['id'], how='left')  #
+    data_z = pd.merge(data_z, temp6, on=['id'], how='left')  #
+    data_z = pd.merge(data_z, temp7, on=['id'], how='left')  #
+    data_z = pd.merge(data_z, temp8, on=['id'], how='left')  #
+    data_z = pd.merge(data_z, temp9, on=['id'], how='left')  #
+    data_z = pd.merge(data_z, temp10, on=['id'], how='left')  #
+    data_z = pd.merge(data_z, temp11, on=['id'], how='left')  #
+    data_z = pd.merge(data_z, temp12, on=['id'], how='left')  #
+    return data_z
+
+
+
+train_data = pd.merge(train_lab, cust_bas_inf, on=['id'], how='left')  #
+#train_data = pd.merge(train_data, sz_detail_train, on=['id'], how='left')  #
+train_data.click_w228 = list(map(lambda x:int(x),train_data.click_w228))
+#train_lab = train_data['click_w228']
+del train_data['click_w228']
+del train_data['aum306']
+train_data.rename(columns={'aum227':'aum'}, inplace=True)#在原表上修改列名
+train_data = train_data.fillna(0)#有空的用0替换
+#print(train_data)
+#train_data = train_data.dropna(axis = 0,inplace = False)
+train_data = time_split_train(train_data,sz_detail)
+
+
+# temp = sz_detail[(sz_detail['prt_dt'].isin(date_train))].groupby(['id'])['d'].agg({'last_day': np.max})  #
+# temp['last_day'] = 
+# temp.last_day = (201902-(temp.last_day/100).astype(int))*31+(27-temp.last_day+(temp.last_day/100).astype(int)*100)
+# train_data = pd.merge(train_data, temp, on=['id'], how='left')  #
+train_data = pd.merge(train_data, train_lab, on=['id'], how='left')  #
+#train_data.to_csv('train_data_new.csv',encoding='utf-8',index=False)
+# train_lab=pd.DataFrame(train_lab,columns=['click_w228'])
+# train_lab.to_csv('train_lab.csv',encoding='utf-8',index=False)
+
+
+# #测试
+# #temp = sz_detail_test.groupby(['id'])['rmb_amt'].agg({'temp': np.sum})  #
+# #test_lab = pd.merge(test_lab, temp, on=['id'], how='left')  #
+# test_data = pd.merge(test_lab, cust_bas_inf, on=['id'], how='left')  #
+# #del test_data['temp']
+# del test_data['aum227']
+# test_data.rename(columns={'aum306':'aum'}, inplace=True)#在原表上修改列名
+# test_data = test_data.fillna(0)#有空的用0替换
+# #test_data = test_data.dropna(axis = 0,inplace = False)
+# #经过特征处理
+# test_data = time_split_test(test_data,sz_detail)
+#print(test_data)
+
+#test_data.to_csv('test_data.csv',encoding='utf-8',index=False)
+
+print('success')
